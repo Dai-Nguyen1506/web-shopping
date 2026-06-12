@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto rounded-3xl glass p-8 shadow-xl text-center">
+    <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 text-emerald-600 mb-6">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+    </div>
+    
+    <h2 class="text-3xl font-bold text-slate-800 mb-2">Đặt Hàng Thành Công!</h2>
+    <p class="text-slate-500 text-sm mb-8">Cảm ơn bạn đã lựa chọn mua sắm tại E-Shop Premium. Đơn hàng của bạn đang được xử lý.</p>
+    
+    <div class="bg-white/50 border border-slate-100 rounded-2xl p-6 text-left space-y-4 shadow-inner">
+        <h3 class="text-base font-bold text-slate-800 border-b pb-2">Chi tiết hóa đơn #{{ order.id }}</h3>
+        
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <span class="text-xs text-slate-400 block">Người nhận</span>
+                <span class="font-semibold text-slate-700">{{ order.recipient_name }}</span>
+            </div>
+            <div>
+                <span class="text-xs text-slate-400 block">Số điện thoại</span>
+                <span class="font-semibold text-slate-700">{{ order.recipient_phone }}</span>
+            </div>
+            <div class="col-span-2">
+                <span class="text-xs text-slate-400 block">Địa chỉ giao nhận</span>
+                <span class="font-semibold text-slate-700">{{ order.shipping_address }}</span>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-100 pt-4 space-y-2">
+            <span class="text-xs text-slate-400 block">Danh sách mặt hàng</span>
+            {% for item in order.items %}
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-600">{{ item.product.name }} x{{ item.quantity }}</span>
+                    <span class="font-semibold text-slate-800">{{ "{:,.0f}".format(item.price * item.quantity) }}đ</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="border-t border-slate-100 pt-4 space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span class="text-slate-500">Tạm tính:</span>
+                <span class="font-semibold text-slate-700">{{ "{:,.0f}".format(order.total_amount) }}đ</span>
+            </div>
+            {% if order.discount_amount > 0 %}
+                <div class="flex justify-between text-emerald-600 font-semibold">
+                    <span>Giảm giá (Coupon):</span>
+                    <span>-{{ "{:,.0f}".format(order.discount_amount) }}đ</span>
+                </div>
+            {% endif %}
+            <div class="flex justify-between text-base font-bold text-brand-600 pt-2 border-t border-dashed">
+                <span>Tổng cộng:</span>
+                <span>{{ "{:,.0f}".format(order.final_amount) }}đ</span>
+            </div>
+        </div>
+    </div>
+
+    <a href="/" class="inline-block px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg transition-colors mt-8">
+        Tiếp Tục Mua Sắm
+    </a>
+</div>
+{% endblock %}

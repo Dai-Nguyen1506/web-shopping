@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-3xl font-bold text-slate-800 mb-6 bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent">Giỏ Hàng Của Bạn</h2>
+
+{% if cart_items %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-4">
+            {% for item in cart_items %}
+                <div class="flex items-center gap-4 p-4 rounded-2xl glass shadow-sm hover:shadow-md transition-all justify-between" id="cart-item-{{ item.product.id }}">
+                    <div class="flex items-center gap-4">
+                        <div class="h-20 w-20 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
+                            {% if item.product.image_url %}
+                                <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-base leading-tight">{{ item.product.name }}</h4>
+                            <span class="text-sm font-semibold text-brand-600 block mt-1">{{ "{:,.0f}".format(item.product.price) }}đ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center rounded-lg border border-slate-200 bg-white/50 overflow-hidden">
+                            <button onclick="changeQty({{ item.product.id }}, {{ item.quantity - 1 }})" class="px-2.5 py-1.5 hover:bg-slate-100 text-slate-500 font-bold transition-colors">-</button>
+                            <input type="text" readonly value="{{ item.quantity }}" class="w-10 text-center font-bold text-slate-800 text-sm bg-transparent focus:outline-none">
+                            <button onclick="changeQty({{ item.product.id }}, {{ item.quantity + 1 }})" class="px-2.5 py-1.5 hover:bg-slate-100 text-slate-500 font-bold transition-colors">+</button>
+                        </div>
+                        <button onclick="changeQty({{ item.product.id }}, 0)" class="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="p-6 rounded-2xl glass shadow-md space-y-6">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-2">Tóm tắt đơn hàng</h3>
+                
+                <div class="space-y-3 text-sm text-slate-600">
+                    <div class="flex justify-between">
+                        <span>Tạm tính:</span>
+                        <span class="font-semibold text-slate-800" id="raw-total">{{ "{:,.0f}".format(total_amount) }}đ</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center bg-brand-50/50 p-2.5 rounded-xl border border-brand-100">
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-slate-700">Mã giảm giá:</span>
+                            <span class="text-xs text-brand-600" id="coupon-label">{% if coupon_code %}{{ coupon_code }}{% else %}Không áp dụng{% endif %}</span>
+                        </div>
+                        <span class="font-bold text-emerald-600" id="discount-amount">-{{ "{:,.0f}".format(discount_amount) }}đ</span>
+                    </div>
+                    
+                    <div class="border-t pt-4 flex justify-between text-base font-bold text-slate-800">
+                        <span>Tổng tiền:</span>
+                        <span class="text-xl text-brand-600" id="final-total">{{ "{:,.0f}".format(final_amount) }}đ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex gap-2">
+                        <input type="text" id="coupon-input" value="{{ coupon_code }}" placeholder="MÃ GIẢM GIÁ" class="w-2/3 px-3 py-2 rounded-xl border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase font-semibold text-sm">
+                        <button onclick="applyCoupon()" class="w-1/3 py-2 bg-slate-800 text-white text-xs font-bold rounded-xl hover:bg-slate-900 transition-colors">
+                            Áp Dụng
+                        </button>
+                    </div>
+                    {% if coupon_code %}
+                        <button onclick="removeCoupon()" class="w-full py-1 text-center text-xs text-rose-500 font-semibold hover:underline">
+                            Hủy áp dụng mã
+                        </button>
+                    {% endif %}
+                </div>
+
+                <a href="/checkout" class="block w-full py-3 text-center bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg transition-all duration-200 hover:-translate-y-0.5 mt-4">
+                    Tiến Hành Thanh Toán
+                </a>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="p-12 text-center rounded-2xl glass shadow-md max-w-lg mx-auto mt-12">
+        <svg class="w-16 h-16 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        <h4 class="text-xl font-bold text-slate-700">Giỏ hàng của bạn đang trống</h4>
+        <p class="text-sm text-slate-500 mt-2">Hãy dạo quanh cửa hàng và lựa chọn các mặt hàng yêu thích.</p>
+        <a href="/" class="inline-block px-6 py-2.5 bg-brand-600 text-white font-bold rounded-xl shadow-md hover:bg-brand-700 transition-colors mt-6">
+            Mua Sắm Ngay
+        </a>
+    </div>
+{% endif %}
+
+<script>
+    async function changeQty(productId, quantity) {
+        try {
+            const response = await fetch('/api/cart/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId, quantity: quantity })
+            });
+            const res = await response.json();
+            if (res.success) {
+                location.reload();
+            } else {
+                showToast('Không thể cập nhật số lượng!', 'error');
+            }
+        } catch (err) {
+            showToast('Lỗi kết nối!', 'error');
+        }
+    }
+
+    async function applyCoupon() {
+        const code = document.getElementById('coupon-input').value.trim();
+        if (!code) {
+            showToast('Vui lòng nhập mã giảm giá!', 'error');
+            return;
+        }
+        try {
+            const response = await fetch('/api/cart/apply-coupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code })
+            });
+            const res = await response.json();
+            if (response.ok && res.success) {
+                showToast('Áp dụng mã giảm giá thành công!', 'success');
+                setTimeout(() => location.reload(), 500);
+            } else {
+                showToast(res.detail || 'Mã giảm giá không hợp lệ!', 'error');
+            }
+        } catch (err) {
+            showToast('Lỗi áp dụng mã giảm giá!', 'error');
+        }
+    }
+
+    async function removeCoupon() {
+        try {
+            const response = await fetch('/api/cart/remove-coupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const res = await response.json();
+            if (res.success) {
+                showToast('Đã hủy áp dụng mã giảm giá!', 'success');
+                setTimeout(() => location.reload(), 500);
+            }
+        } catch (err) {
+            showToast('Lỗi kết nối!', 'error');
+        }
+    }
+</script>
+{% endblock %}

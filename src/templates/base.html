@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Shop Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-slate-800">
+    <header class="sticky top-0 z-50 w-full glass shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-2xl font-bold bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent hover:scale-105 transition-transform duration-200">
+                        E-Shop Premium
+                    </a>
+                </div>
+                <nav class="flex items-center space-x-6">
+                    <a href="/" class="text-slate-600 hover:text-brand-600 font-medium transition-colors">Cửa hàng</a>
+                    <a href="/cart" class="text-slate-600 hover:text-brand-600 font-medium transition-colors relative">
+                        Giỏ hàng
+                    </a>
+                    {% if current_user %}
+                        {% if current_user.is_admin %}
+                            <a href="/admin/dashboard" class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors">Admin</a>
+                        {% endif %}
+                        <span class="text-slate-500 font-normal">|</span>
+                        <span class="text-slate-700 font-medium">{{ current_user.full_name }}</span>
+                        <a href="/logout" class="px-4 py-2 text-sm font-medium text-white bg-rose-500 rounded-lg hover:bg-rose-600 shadow-sm transition-all duration-200">Đăng xuất</a>
+                    {% else %}
+                        <span class="text-slate-500 font-normal">|</span>
+                        <a href="/login" class="text-slate-600 hover:text-brand-600 font-medium transition-colors">Đăng nhập</a>
+                        <a href="/register" class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 shadow-md transition-all duration-200 hover:-translate-y-0.5">Đăng ký</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `px-5 py-3 rounded-xl shadow-lg text-white font-medium flex items-center gap-2 transition-all duration-300 transform translate-y-5 opacity-0 ${type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-5', 'opacity-0');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
